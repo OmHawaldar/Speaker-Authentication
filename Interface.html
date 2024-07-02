@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+   pre#log{
+       height:500px;
+       overflow:auto;
+       font-size:1.2em;
+   }
+   audio {
+       display:block;
+   }
+   button {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 0.7em;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1.3em;
+   }
+</style>
+</head>
+<body>
+    <button onclick="showNameForm();">Create Identification Profile</button>
+    <form id="nameForm" class="hidden">
+          <label for="name">Enter a name:</label>
+          <input type="text" id="name" name="name" placeholder="Enter Name" required>
+          <button type="submit" onclick="enrollNewProfile(event);" onclick="">Submit</button>
+       </form>
+<!-- <button onclick="enrollNewProfile();">Create Identification Profile</button> -->
+<button onclick="startListeningForIdentification();">Identify</button>
+<hr>
+<button onclick="getVerificationPhrases();">List Verification phrases</button>
+<button onclick="enrollNewVerificationProfile();">Create Verification Profile</button>
+<button onclick="startListeningForVerification();">Verify</button>
+<hr>
+<button onclick="enrollNewTextIndependentVerificationProfile();">Create Text Independent Profile</button>
+<button onclick="startListeningForTextIndependentVerification();">Text Independent Verify</button>
+<hr>
+<pre id="log"></pre>
+
+<script src="src/speaker-recognition-api-demo-core.js"></script>
+<script src="src/speaker-recognition-api-demo-verification-textdependent.js"></script>
+<script src="src/speaker-recognition-api-demo-verification-textindependent.js"></script>
+<script src="Identification.js"></script>
+<script src="src/recorder-cognitiveservices-rposbo.js"></script>
+<script>
+
+var recorder;
+var audio_context;
+
+function onMediaSuccess(stream, callback, secondsOfAudio) {
+    audio_context = audio_context || new window.AudioContext;
+    var input = audio_context.createMediaStreamSource(stream);
+    recorder = new Recorder(input);
+    recorder.record();
+    
+	setTimeout(() => { StopListening(callback); }, secondsOfAudio*1000);
+}
+
+function onMediaError(e) {
+    console.error('media error', e);
+}
+
+function StopListening(callback){
+	console.log('...working...');
+    recorder && recorder.stop();
+    recorder.exportWAV(function(blob) {
+        callback(blob);
+    });
+    recorder.clear();
+}
+
+function showNameForm() {
+  const nameForm = document.getElementById('nameForm');
+  nameForm.classList.remove('hidden'); // Make the form visible
+}
+
+</script>
+ </body>
+</html>
